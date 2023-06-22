@@ -31,10 +31,13 @@ metadata:
       {{- . | nindent 4 }}
     {{- end }}
     repdanda.com/type: "loadbalancer"
-  {{- if (or $values.external.annotations (dig "externalDns" "enabled" false $values.external) ) }}
+  {{- if (or $values.external.annotations $values.external.indexedAnnotations (dig "externalDns" "enabled" false $values.external) ) }}
   annotations:
     {{- with $values.external.annotations }}
       {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- range $annotation, $annotationValues := $values.external.indexedAnnotations }}
+        {{ $annotation }}: {{ index $annotationValues $replicaIndex }}
     {{- end }}
     {{- if (dig "externalDns" "enabled" false $values.external) }}
       {{- $address := printf "%s.%s" $podName (tpl $values.external.domain $) }}
